@@ -12,6 +12,9 @@
       "moby": false
     }
   },
+  "mounts": [
+    "source=qcodingtest-claude,target=/home/vscode/.claude,type=volume"
+  ],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
