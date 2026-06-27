@@ -18,6 +18,7 @@
       "extensions": [
         "anthropic.claude-code",
         "fwcd.kotlin",
+        "jetbrains.kotlin-server",
         "rnoro.vscode-ktlint-formatter",
         "vscjava.vscode-java-pack",
         "vscjava.vscode-gradle",
