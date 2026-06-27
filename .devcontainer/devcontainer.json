@@ -1,6 +1,6 @@
 {
   "name": "qcodingtest",
-  "image": "mcr.microsoft.com/devcontainers/java:3-25",
+  "build": { "dockerfile": "Dockerfile" },
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "none",
@@ -18,6 +18,9 @@
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
+      "settings": {
+        "java.import.gradle.java.home": "/usr/lib/jvm/msopenjdk-current"
+      },
       "extensions": [
         "anthropic.claude-code",
         "jetbrains.kotlin-server",
