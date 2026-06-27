@@ -94,7 +94,7 @@
 | マイグレーション | Flyway | Spring Boot 4.1.0 の管理バージョンに追従 |
 | DB | PostgreSQL | 17 |
 | テスト | JUnit 5（kotlin-test-junit5） | Spring Boot 4.1.0 の管理バージョンに追従 |
-| フォーマット | ktlint + EditorConfig | プラグイン現行最新 |
+| フォーマット、リント | ktlint + EditorConfig | プラグイン現行最新 |
 | コンテナ | Docker Compose | - |
 
 ### 2.2 OpenAPI / スキーマ駆動
@@ -113,6 +113,7 @@
 
 ### 2.4 設計原則
 
+- [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html)に従う
 - レイヤードアーキテクチャ + ドメインレイヤー
 - **出版状況の遷移などのビジネスルールはドメイン層で検証する**（Controller / Service に散らさない）。
 
