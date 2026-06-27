@@ -1,4 +1,4 @@
-package com.example.qcodingtest.infrastructure.repository
+package com.example.qcodingtest.repository
 
 import com.example.qcodingtest.domain.book.Book
 import com.example.qcodingtest.domain.book.BookRepository
@@ -8,14 +8,13 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
 
-/** [BookRepository] の jOOQ 実装。 */
 @Repository
 class BookRepositoryImpl(
-    private val dslContext: DSLContext,
+    private val create: DSLContext,
 ) : BookRepository {
     override fun create(book: Book): Book {
         val bookId =
-            dslContext
+            create
                 .insertInto(BOOKS)
                 .set(BOOKS.TITLE, book.title)
                 .set(BOOKS.PRICE, book.price)
@@ -25,7 +24,7 @@ class BookRepositoryImpl(
                 .id
 
         val linkRows = book.authorIds.map { authorId -> DSL.row(authorId, bookId) }
-        dslContext
+        create
             .insertInto(AUTHOR_BOOKS, AUTHOR_BOOKS.AUTHOR_ID, AUTHOR_BOOKS.BOOK_ID)
             .valuesOfRows(linkRows)
             .execute()
@@ -36,7 +35,7 @@ class BookRepositoryImpl(
     override fun update(book: Book) {
         val bookId = requireNotNull(book.id) { "更新には永続化済みの書籍ID が必要です" }
 
-        dslContext
+        create
             .update(BOOKS)
             .set(BOOKS.TITLE, book.title)
             .set(BOOKS.PRICE, book.price)
@@ -46,13 +45,13 @@ class BookRepositoryImpl(
             .execute()
 
         // PUT は全置換のため、著者リンクは差分更新せず一旦すべて削除してから貼り直す。
-        dslContext
+        create
             .deleteFrom(AUTHOR_BOOKS)
             .where(AUTHOR_BOOKS.BOOK_ID.eq(bookId))
             .execute()
 
         val linkRows = book.authorIds.map { authorId -> DSL.row(authorId, bookId) }
-        dslContext
+        create
             .insertInto(AUTHOR_BOOKS, AUTHOR_BOOKS.AUTHOR_ID, AUTHOR_BOOKS.BOOK_ID)
             .valuesOfRows(linkRows)
             .execute()

@@ -1,4 +1,4 @@
-package com.example.qcodingtest.infrastructure.repository
+package com.example.qcodingtest.repository
 
 import com.example.qcodingtest.domain.book.Book
 import com.example.qcodingtest.domain.book.BookRepository
@@ -21,7 +21,7 @@ class BookRepositoryImplTest
     @Autowired
     constructor(
         private val bookRepository: BookRepository,
-        private val dslContext: DSLContext,
+        private val create: DSLContext,
     ) : AbstractRepositoryTest() {
         @Test
         fun `create persists the book with its author links and returns it with a generated id`() {
@@ -45,14 +45,14 @@ class BookRepositoryImplTest
             assertEquals(PublicationStatus.UNPUBLISHED, created.publicationStatus)
             assertEquals(setOf(authorId1, authorId2), created.authorIds)
 
-            val bookRecord = dslContext.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
+            val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
             assertNotNull(bookRecord, "bookが永続化されること")
             assertEquals("テスト駆動開発", bookRecord.title)
             assertEquals(2860, bookRecord.price)
             assertEquals(PublicationStatus.UNPUBLISHED.name, bookRecord.publicationStatus)
 
             val linkedAuthorIds =
-                dslContext
+                create
                     .select(AUTHOR_BOOKS.AUTHOR_ID)
                     .from(AUTHOR_BOOKS)
                     .where(AUTHOR_BOOKS.BOOK_ID.eq(bookId))
@@ -87,14 +87,14 @@ class BookRepositoryImplTest
                 ),
             )
 
-            val bookRecord = dslContext.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
+            val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
             assertNotNull(bookRecord, "bookが残っていること")
             assertEquals("新タイトル", bookRecord.title)
             assertEquals(3000, bookRecord.price)
             assertEquals(PublicationStatus.PUBLISHED.name, bookRecord.publicationStatus)
 
             val linkedAuthorIds =
-                dslContext
+                create
                     .select(AUTHOR_BOOKS.AUTHOR_ID)
                     .from(AUTHOR_BOOKS)
                     .where(AUTHOR_BOOKS.BOOK_ID.eq(bookId))
@@ -103,7 +103,7 @@ class BookRepositoryImplTest
         }
 
         private fun insertAuthor(name: String): Long =
-            dslContext
+            create
                 .insertInto(AUTHORS)
                 .set(AUTHORS.NAME, name)
                 .set(AUTHORS.BIRTH_DATE, LocalDate.of(1980, 1, 1))
