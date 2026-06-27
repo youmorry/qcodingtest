@@ -1,5 +1,5 @@
 {
-  "name": "quocard-test",
+  "name": "qcodingtest",
   "image": "mcr.microsoft.com/devcontainers/java:3-25",
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
