@@ -11,5 +11,7 @@ indent_size = 2
 [*.md]
 trim_trailing_whitespace = false
 
+# Kotlin は ktlint_official を基準とする（インデントはプリセット既定の 4）。
 [*.{kt,kts}]
 ktlint_code_style = ktlint_official
+indent_size = 4

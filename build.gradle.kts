@@ -19,6 +19,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.flywaydb.flyway") version "12.4.0"
     id("org.jooq.jooq-codegen-gradle") version "3.21.5"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
 group = "com.example"
@@ -117,4 +118,11 @@ tasks.named("jooqCodegen") {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+ktlint {
+    // jOOQ の自動生成コードは整形対象外とする。
+    filter {
+        exclude { it.file.path.contains(jooqOutputDir) }
+    }
 }
