@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class QcodingtestApplication
 
 fun main(args: Array<String>) {
-	runApplication<QcodingtestApplication>(*args)
+    runApplication<QcodingtestApplication>(*args)
 }
