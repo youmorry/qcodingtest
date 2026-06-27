@@ -13,3 +13,4 @@
 | 7 | 2026-06-27 | 書籍更新は PUT による全置換とし、著者リンクは差分計算せず「全削除→再挿入」で置き換える | PUT は冪等なリソース全体置換のセマンティクス。著者は数件規模で、差分計算より delete+insert の方が単純かつ意図が明確。要件で詳細が指定されない部分は標準的な処理に留める |
 | 8 | 2026-06-27 | `updated_at` は更新時にリポジトリ側で `currentOffsetDateTime()` を明示的にセットする（DBトリガーは設けない） | `DEFAULT now()` は INSERT 時しか効かず、UPDATE では更新されないため明示的なセットが必要。トリガーは隠れた副作用となり追いにくく、更新箇所も限られるため、コード上で明示する方が分かりやすい |
 | 9 | 2026-06-27 | 出版状況の遷移ルール（PUBLISHED→UNPUBLISHED 禁止）は `PublicationStatus.canTransitionTo` として表現し、`Book.init` の構造的不変条件（`require`）とは分離する | 遷移可否は「現在状態」と「新状態」の2値関係なので enum に置くのが最も凝集度が高い。構造制約（入力形式）違反は 400、遷移などのビジネスルール違反は 422 と区別する方針に沿い、検証手段も分離する |
+| 10 | 2026-06-27 | jOOQ codegen で `isKotlinNotNullRecordAttributes = true` を有効にし、DDL が `NOT NULL` のカラムを非null Kotlin型として生成する | デフォルト設定では PK や必須カラムも `Long?`/`String?` で生成され、不要な `!!` や null ガードが全体に波及する。Record クラスの属性を非null型にすることで null安全にする。`id`（自動採番）・`created_at`/`updated_at`（DEFAULT あり）は INSERT 前に null を許容するため引き続き nullable のまま |

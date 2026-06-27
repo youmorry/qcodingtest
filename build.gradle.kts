@@ -86,6 +86,7 @@ jooq {
                 isDeprecated = false
                 isPojos = false
                 isDaos = false
+                isKotlinNotNullRecordAttributes = true
             }
             target {
                 packageName = "com.example.qcodingtest.jooq"
