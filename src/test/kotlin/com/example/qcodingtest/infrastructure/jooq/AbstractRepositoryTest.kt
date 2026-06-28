@@ -1,4 +1,4 @@
-package com.example.qcodingtest.repository
+package com.example.qcodingtest.infrastructure.jooq
 
 import com.example.qcodingtest.testutil.SharedPostgresContainer
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
