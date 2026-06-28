@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository
 class JooqBookRepository(
     private val create: DSLContext,
 ) : BookRepository {
-    override fun create(book: Book): Book {
+    override fun save(book: Book): Book = if (book.id == null) create(book) else update(book)
+
+    private fun create(book: Book): Book {
         val bookId =
             create
                 .insertInto(BOOKS)
@@ -32,7 +34,7 @@ class JooqBookRepository(
         return book.copy(id = bookId)
     }
 
-    override fun update(book: Book) {
+    private fun update(book: Book): Book {
         val bookId = requireNotNull(book.id) { "更新には永続化済みの書籍ID が必要です" }
 
         create
@@ -55,5 +57,7 @@ class JooqBookRepository(
             .insertInto(AUTHOR_BOOKS, AUTHOR_BOOKS.AUTHOR_ID, AUTHOR_BOOKS.BOOK_ID)
             .valuesOfRows(linkRows)
             .execute()
+
+        return book
     }
 }

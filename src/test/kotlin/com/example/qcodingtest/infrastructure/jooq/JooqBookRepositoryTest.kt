@@ -29,7 +29,7 @@ class JooqBookRepositoryTest
             val authorId2 = insertAuthor("著者B")
 
             val created =
-                bookRepository.create(
+                bookRepository.save(
                     Book(
                         id = null,
                         title = "テスト駆動開発",
@@ -67,7 +67,7 @@ class JooqBookRepositoryTest
             val authorId3 = insertAuthor("著者C")
 
             val created =
-                bookRepository.create(
+                bookRepository.save(
                     Book(
                         id = null,
                         title = "旧タイトル",
@@ -78,14 +78,15 @@ class JooqBookRepositoryTest
                 )
             val bookId = assertNotNull(created.id)
 
-            bookRepository.update(
-                created.copy(
-                    title = "新タイトル",
-                    price = 3000,
-                    publicationStatus = PublicationStatus.PUBLISHED,
-                    authorIds = setOf(authorId2, authorId3),
-                ),
-            )
+            val updated =
+                bookRepository.save(
+                    created.copy(
+                        title = "新タイトル",
+                        price = 3000,
+                        publicationStatus = PublicationStatus.PUBLISHED,
+                        authorIds = setOf(authorId2, authorId3),
+                    ),
+                )
 
             val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
             assertNotNull(bookRecord, "bookが残っていること")
