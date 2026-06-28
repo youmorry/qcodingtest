@@ -17,8 +17,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @JooqTest
-@Import(AuthorRepositoryImpl::class)
-class AuthorRepositoryImplTest
+@Import(JooqAuthorRepository::class)
+class JooqAuthorRepositoryTest
     @Autowired
     constructor(
         private val authorRepository: AuthorRepository,

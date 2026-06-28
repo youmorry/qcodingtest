@@ -16,8 +16,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @JooqTest
-@Import(BookRepositoryImpl::class)
-class BookRepositoryImplTest
+@Import(JooqBookRepository::class)
+class JooqBookRepositoryTest
     @Autowired
     constructor(
         private val bookRepository: BookRepository,

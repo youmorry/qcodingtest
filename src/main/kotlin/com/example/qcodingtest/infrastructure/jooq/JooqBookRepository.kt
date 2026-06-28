@@ -9,7 +9,7 @@ import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
 
 @Repository
-class BookRepositoryImpl(
+class JooqBookRepository(
     private val create: DSLContext,
 ) : BookRepository {
     override fun create(book: Book): Book {

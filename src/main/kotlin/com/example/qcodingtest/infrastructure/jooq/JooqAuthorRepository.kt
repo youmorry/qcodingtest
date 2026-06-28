@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 import java.util.Optional
 
 @Repository
-class AuthorRepositoryImpl(
+class JooqAuthorRepository(
     private val create: DSLContext,
 ) : AuthorRepository {
     override fun create(author: Author): Author {
