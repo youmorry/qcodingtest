@@ -78,15 +78,14 @@ class JooqBookRepositoryTest
                 )
             val bookId = assertNotNull(created.id)
 
-            val updated =
-                bookRepository.save(
-                    created.copy(
-                        title = "新タイトル",
-                        price = 3000,
-                        publicationStatus = PublicationStatus.PUBLISHED,
-                        authorIds = setOf(authorId2, authorId3),
-                    ),
-                )
+            bookRepository.save(
+                created.copy(
+                    title = "新タイトル",
+                    price = 3000,
+                    publicationStatus = PublicationStatus.PUBLISHED,
+                    authorIds = setOf(authorId2, authorId3),
+                ),
+            )
 
             val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
             assertNotNull(bookRecord, "bookが残っていること")
