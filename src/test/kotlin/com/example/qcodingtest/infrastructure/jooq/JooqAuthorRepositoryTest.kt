@@ -13,6 +13,7 @@ import org.springframework.boot.jooq.test.autoconfigure.JooqTest
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -63,9 +64,7 @@ class JooqAuthorRepositoryTest
             val result = authorRepository.findById(authorId)
 
             assertTrue(result.isPresent)
-            assertEquals(authorId, result.get().id)
-            assertEquals("検索対象", result.get().name)
-            assertEquals(LocalDate.of(1975, 3, 10), result.get().birthDate)
+            assertEquals(created.copy(id = authorId), result.get())
         }
 
         @Test
@@ -76,20 +75,24 @@ class JooqAuthorRepositoryTest
         }
 
         @Test
-        fun `should return books linked to the author`() {
-            val author =
-                authorRepository.save(Author(id = null, name = "著者A", birthDate = LocalDate.of(1970, 1, 1)))
-            val authorId = assertNotNull(author.id)
+        fun `should return true when all given authors exist`() {
+            val id1 = assertNotNull(saveAuthor("著者1"))
+            val id2 = assertNotNull(saveAuthor("著者2"))
 
-            val bookId =
-                create
-                    .insertInto(BOOKS)
-                    .set(BOOKS.TITLE, "テスト書籍")
-                    .set(BOOKS.PRICE, 1500)
-                    .set(BOOKS.PUBLICATION_STATUS, "PUBLISHED")
-                    .returning(BOOKS.ID)
-                    .fetchSingle()
-                    .id
+            assertTrue(authorRepository.existsAllByIds(setOf(id1, id2)))
+        }
+
+        @Test
+        fun `should return false when any given author is missing`() {
+            val id1 = assertNotNull(saveAuthor("著者1"))
+
+            assertFalse(authorRepository.existsAllByIds(setOf(id1, -1L)))
+        }
+
+        @Test
+        fun `should return books linked to the author`() {
+            val authorId = assertNotNull(saveAuthor("著者A"))
+            val bookId = insertBook("テスト書籍")
             create
                 .insertInto(AUTHOR_BOOKS)
                 .set(AUTHOR_BOOKS.AUTHOR_ID, authorId)
@@ -107,12 +110,27 @@ class JooqAuthorRepositoryTest
 
         @Test
         fun `should return empty list when the author has no books`() {
-            val author =
-                authorRepository.save(Author(id = null, name = "著者B", birthDate = LocalDate.of(1980, 6, 15)))
-            val authorId = assertNotNull(author.id)
+            val authorId = assertNotNull(saveAuthor("著者B"))
 
             val books = authorRepository.findBooksById(authorId)
 
             assertTrue(books.isEmpty())
         }
+
+        private fun saveAuthor(name: String): Long =
+            authorRepository.save(Author(id = null, name = name, birthDate = LocalDate.of(1980, 1, 1))).id!!
+
+        private fun insertBook(
+            title: String,
+            price: Int = 1500,
+            status: String = "PUBLISHED",
+        ): Long =
+            create
+                .insertInto(BOOKS)
+                .set(BOOKS.TITLE, title)
+                .set(BOOKS.PRICE, price)
+                .set(BOOKS.PUBLICATION_STATUS, status)
+                .returning(BOOKS.ID)
+                .fetchSingle()
+                .id!!
     }

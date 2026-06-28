@@ -11,6 +11,9 @@ interface AuthorRepository {
     /** 指定 ID の著者を返す。 */
     fun findById(id: Long): Optional<Author>
 
+    /** 指定 ID の著者がすべて存在するかを返す。 */
+    fun existsAllByIds(ids: Set<Long>): Boolean
+
     /** 指定著者 ID に紐づく書籍一覧を返す。 */
     fun findBooksById(id: Long): List<BookView>
 }

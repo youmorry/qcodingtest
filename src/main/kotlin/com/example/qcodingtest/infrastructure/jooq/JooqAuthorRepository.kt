@@ -50,6 +50,8 @@ class JooqAuthorRepository(
                 ?.let { Author(id = it.id, name = it.name, birthDate = it.birthDate) },
         )
 
+    override fun existsAllByIds(ids: Set<Long>): Boolean = create.fetchCount(AUTHORS, AUTHORS.ID.`in`(ids)) == ids.size
+
     override fun findBooksById(id: Long): List<BookView> =
         create
             .select(BOOKS.ID, BOOKS.TITLE, BOOKS.PRICE, BOOKS.PUBLICATION_STATUS)

@@ -2,6 +2,7 @@ package com.example.qcodingtest.infrastructure.jooq
 
 import com.example.qcodingtest.domain.book.Book
 import com.example.qcodingtest.domain.book.BookRepository
+import com.example.qcodingtest.domain.book.BookWithAuthors
 import com.example.qcodingtest.domain.book.PublicationStatus
 import com.example.qcodingtest.jooq.tables.references.AUTHORS
 import com.example.qcodingtest.jooq.tables.references.AUTHOR_BOOKS
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @JooqTest
 @Import(JooqBookRepository::class)
@@ -30,19 +32,16 @@ class JooqBookRepositoryTest
 
             val created =
                 bookRepository.save(
-                    Book(
-                        id = null,
-                        title = "テスト駆動開発",
-                        price = 2860,
-                        publicationStatus = PublicationStatus.UNPUBLISHED,
+                    BookWithAuthors(
+                        book = Book(id = null, title = "テスト駆動開発", price = 2860, publicationStatus = PublicationStatus.UNPUBLISHED),
                         authorIds = setOf(authorId1, authorId2),
                     ),
                 )
 
-            val bookId = assertNotNull(created.id, "ID が採番されること")
-            assertEquals("テスト駆動開発", created.title)
-            assertEquals(2860, created.price)
-            assertEquals(PublicationStatus.UNPUBLISHED, created.publicationStatus)
+            val bookId = assertNotNull(created.book.id, "ID が採番されること")
+            assertEquals("テスト駆動開発", created.book.title)
+            assertEquals(2860, created.book.price)
+            assertEquals(PublicationStatus.UNPUBLISHED, created.book.publicationStatus)
             assertEquals(setOf(authorId1, authorId2), created.authorIds)
 
             val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
@@ -68,21 +67,16 @@ class JooqBookRepositoryTest
 
             val created =
                 bookRepository.save(
-                    Book(
-                        id = null,
-                        title = "旧タイトル",
-                        price = 1000,
-                        publicationStatus = PublicationStatus.UNPUBLISHED,
+                    BookWithAuthors(
+                        book = Book(id = null, title = "旧タイトル", price = 1000, publicationStatus = PublicationStatus.UNPUBLISHED),
                         authorIds = setOf(authorId1, authorId2),
                     ),
                 )
-            val bookId = assertNotNull(created.id)
+            val bookId = assertNotNull(created.book.id)
 
             bookRepository.save(
                 created.copy(
-                    title = "新タイトル",
-                    price = 3000,
-                    publicationStatus = PublicationStatus.PUBLISHED,
+                    book = created.book.copy(title = "新タイトル", price = 3000, publicationStatus = PublicationStatus.PUBLISHED),
                     authorIds = setOf(authorId2, authorId3),
                 ),
             )
@@ -100,6 +94,30 @@ class JooqBookRepositoryTest
                     .where(AUTHOR_BOOKS.BOOK_ID.eq(bookId))
                     .fetch(AUTHOR_BOOKS.AUTHOR_ID)
             assertEquals(setOf(authorId2, authorId3), linkedAuthorIds.toSet(), "著者リンクが新しい集合で置き換わること")
+        }
+
+        @Test
+        fun `should return the book without authors when it exists`() {
+            val authorId = insertAuthor("著者A")
+            val created =
+                bookRepository.save(
+                    BookWithAuthors(
+                        book = Book(id = null, title = "対象書籍", price = 1500, publicationStatus = PublicationStatus.PUBLISHED),
+                        authorIds = setOf(authorId),
+                    ),
+                )
+            val bookId = assertNotNull(created.book.id)
+            val result = bookRepository.findById(bookId)
+
+            assertTrue(result.isPresent)
+            assertEquals(created.book, result.get())
+        }
+
+        @Test
+        fun `should return empty when the book does not exist`() {
+            val result = bookRepository.findById(-1L)
+
+            assertTrue(result.isEmpty)
         }
 
         private fun insertAuthor(name: String): Long =
