@@ -24,7 +24,7 @@ class BookRepositoryImplTest
         private val create: DSLContext,
     ) : AbstractRepositoryTest() {
         @Test
-        fun `create persists the book with its author links and returns it with a generated id`() {
+        fun `should persist the book with its author links and return it with a generated id`() {
             val authorId1 = insertAuthor("著者A")
             val authorId2 = insertAuthor("著者B")
 
@@ -61,7 +61,7 @@ class BookRepositoryImplTest
         }
 
         @Test
-        fun `update replaces the book fields and its author links`() {
+        fun `should replace all book fields and author links when updated`() {
             val authorId1 = insertAuthor("著者A")
             val authorId2 = insertAuthor("著者B")
             val authorId3 = insertAuthor("著者C")

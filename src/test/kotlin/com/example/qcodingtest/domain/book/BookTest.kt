@@ -16,7 +16,7 @@ class BookTest {
         )
 
     @Test
-    fun `applyUpdate applies new values and keeps the persisted id`() {
+    fun `should apply new values and keep the persisted id`() {
         val updated =
             published.applyUpdate(
                 title = "改訂版",
@@ -38,7 +38,7 @@ class BookTest {
     }
 
     @Test
-    fun `applyUpdate rejects transition from published to unpublished`() {
+    fun `should reject transition from published to unpublished`() {
         assertFailsWith<BusinessRuleViolationException> {
             published.applyUpdate(
                 title = published.title,
@@ -50,7 +50,7 @@ class BookTest {
     }
 
     @Test
-    fun `applyUpdate still enforces structural invariants`() {
+    fun `should enforce structural invariants`() {
         assertFailsWith<IllegalArgumentException> {
             published.applyUpdate(
                 title = published.title,

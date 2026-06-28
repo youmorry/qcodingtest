@@ -25,7 +25,7 @@ class AuthorRepositoryImplTest
         private val create: DSLContext,
     ) : AbstractRepositoryTest() {
         @Test
-        fun `create persists the author and returns it with a generated id`() {
+        fun `should persist the author and return it with a generated id`() {
             val birthDate = LocalDate.of(1990, 5, 20)
 
             val created = authorRepository.create(Author(id = null, name = "テスト太郎", birthDate = birthDate))
@@ -41,7 +41,7 @@ class AuthorRepositoryImplTest
         }
 
         @Test
-        fun `update replaces the author fields`() {
+        fun `should replace all author fields when updated`() {
             val created =
                 authorRepository.create(Author(id = null, name = "旧名前", birthDate = LocalDate.of(1980, 1, 1)))
             val authorId = assertNotNull(created.id)
@@ -55,7 +55,7 @@ class AuthorRepositoryImplTest
         }
 
         @Test
-        fun `findById returns the author when found`() {
+        fun `should return the author when it exists`() {
             val created =
                 authorRepository.create(Author(id = null, name = "検索対象", birthDate = LocalDate.of(1975, 3, 10)))
             val authorId = assertNotNull(created.id)
@@ -69,14 +69,14 @@ class AuthorRepositoryImplTest
         }
 
         @Test
-        fun `findById returns empty when the author does not exist`() {
+        fun `should return empty when the author does not exist`() {
             val result = authorRepository.findById(-1L)
 
             assertTrue(result.isEmpty)
         }
 
         @Test
-        fun `findBooksById returns books linked to the author`() {
+        fun `should return books linked to the author`() {
             val author =
                 authorRepository.create(Author(id = null, name = "著者A", birthDate = LocalDate.of(1970, 1, 1)))
             val authorId = assertNotNull(author.id)
@@ -106,7 +106,7 @@ class AuthorRepositoryImplTest
         }
 
         @Test
-        fun `findBooksById returns empty list when the author has no books`() {
+        fun `should return empty list when the author has no books`() {
             val author =
                 authorRepository.create(Author(id = null, name = "著者B", birthDate = LocalDate.of(1980, 6, 15)))
             val authorId = assertNotNull(author.id)
