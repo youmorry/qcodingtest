@@ -5,11 +5,8 @@ import java.util.Optional
 
 /** 著者の永続化を担うリポジトリ。 */
 interface AuthorRepository {
-    /** 著者を新規登録し、採番された ID を持つ [Author] を返す。 */
-    fun create(author: Author): Author
-
-    /** 既存の著者を全置換（PUT）で更新する。 */
-    fun update(author: Author)
+    /** upsert（新規登録または更新）する。 */
+    fun save(author: Author): Author
 
     /** 指定 ID の著者を返す。 */
     fun findById(id: Long): Optional<Author>

@@ -16,7 +16,9 @@ import java.util.Optional
 class JooqAuthorRepository(
     private val create: DSLContext,
 ) : AuthorRepository {
-    override fun create(author: Author): Author {
+    override fun save(author: Author): Author = if (author.id == null) create(author) else update(author)
+
+    private fun create(author: Author): Author {
         val authorId =
             create
                 .insertInto(AUTHORS)
@@ -28,7 +30,7 @@ class JooqAuthorRepository(
         return author.copy(id = authorId)
     }
 
-    override fun update(author: Author) {
+    private fun update(author: Author): Author {
         create
             .update(AUTHORS)
             .set(AUTHORS.NAME, author.name)
@@ -36,6 +38,7 @@ class JooqAuthorRepository(
             .set(AUTHORS.UPDATED_AT, DSL.currentOffsetDateTime())
             .where(AUTHORS.ID.eq(author.id))
             .execute()
+        return author
     }
 
     override fun findById(id: Long): Optional<Author> =

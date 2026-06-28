@@ -28,7 +28,7 @@ class JooqAuthorRepositoryTest
         fun `should persist the author and return it with a generated id`() {
             val birthDate = LocalDate.of(1990, 5, 20)
 
-            val created = authorRepository.create(Author(id = null, name = "テスト太郎", birthDate = birthDate))
+            val created = authorRepository.save(Author(id = null, name = "テスト太郎", birthDate = birthDate))
 
             val authorId = assertNotNull(created.id, "ID が採番されること")
             assertEquals("テスト太郎", created.name)
@@ -43,10 +43,10 @@ class JooqAuthorRepositoryTest
         @Test
         fun `should replace all author fields when updated`() {
             val created =
-                authorRepository.create(Author(id = null, name = "旧名前", birthDate = LocalDate.of(1980, 1, 1)))
+                authorRepository.save(Author(id = null, name = "旧名前", birthDate = LocalDate.of(1980, 1, 1)))
             val authorId = assertNotNull(created.id)
 
-            authorRepository.update(created.copy(name = "新名前", birthDate = LocalDate.of(1985, 6, 15)))
+            authorRepository.save(created.copy(name = "新名前", birthDate = LocalDate.of(1985, 6, 15)))
 
             val record = create.selectFrom(AUTHORS).where(AUTHORS.ID.eq(authorId)).fetchOne()
             assertNotNull(record)
@@ -57,7 +57,7 @@ class JooqAuthorRepositoryTest
         @Test
         fun `should return the author when it exists`() {
             val created =
-                authorRepository.create(Author(id = null, name = "検索対象", birthDate = LocalDate.of(1975, 3, 10)))
+                authorRepository.save(Author(id = null, name = "検索対象", birthDate = LocalDate.of(1975, 3, 10)))
             val authorId = assertNotNull(created.id)
 
             val result = authorRepository.findById(authorId)
@@ -78,7 +78,7 @@ class JooqAuthorRepositoryTest
         @Test
         fun `should return books linked to the author`() {
             val author =
-                authorRepository.create(Author(id = null, name = "著者A", birthDate = LocalDate.of(1970, 1, 1)))
+                authorRepository.save(Author(id = null, name = "著者A", birthDate = LocalDate.of(1970, 1, 1)))
             val authorId = assertNotNull(author.id)
 
             val bookId =
@@ -108,7 +108,7 @@ class JooqAuthorRepositoryTest
         @Test
         fun `should return empty list when the author has no books`() {
             val author =
-                authorRepository.create(Author(id = null, name = "著者B", birthDate = LocalDate.of(1980, 6, 15)))
+                authorRepository.save(Author(id = null, name = "著者B", birthDate = LocalDate.of(1980, 6, 15)))
             val authorId = assertNotNull(author.id)
 
             val books = authorRepository.findBooksById(authorId)
