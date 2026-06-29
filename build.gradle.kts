@@ -18,6 +18,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.flywaydb.flyway") version "12.4.0"
     id("org.jooq.jooq-codegen-gradle") version "3.21.5"
+    id("org.openapi.generator") version "7.23.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -37,6 +38,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jooq")
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -44,6 +46,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-jooq-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
@@ -59,6 +62,9 @@ val dbUrl = "jdbc:postgresql://localhost:5432/qcodingtest"
 val dbUser = "qcodingtest"
 val dbPassword = "qcodingtest"
 val jooqOutputDir = "src/generated/jooq"
+
+// OpenAPI からの生成コードはコミットせず build/ 配下へ毎ビルド生成する。
+val openApiOutputDir = layout.buildDirectory.dir("generated/openapi")
 
 flyway {
     url = dbUrl
@@ -97,8 +103,29 @@ jooq {
     }
 }
 
+// API interface と DTO のみを生成し（interfaceOnly）、Controller 実装は生成 interface を実装する。
+openApiGenerate {
+    generatorName = "kotlin-spring"
+    inputSpec.set("$rootDir/src/main/resources/openapi/openapi.yaml")
+    outputDir.set(openApiOutputDir.get().asFile.path)
+    apiPackage = "com.example.qcodingtest.presentation.api"
+    modelPackage = "com.example.qcodingtest.presentation.model"
+    configOptions =
+        mapOf(
+            "interfaceOnly" to "true",
+            // バージョン3以降という意味
+            "useSpringBoot3" to "true",
+            "useTags" to "true",
+            "useBeanValidation" to "true",
+            "documentationProvider" to "none",
+            "enumPropertyNaming" to "original",
+            "serializationLibrary" to "jackson",
+        )
+}
+
 sourceSets.main {
     kotlin.srcDir(jooqOutputDir)
+    kotlin.srcDir(openApiOutputDir.map { it.dir("src/main/kotlin") })
 }
 
 kotlin {
@@ -107,10 +134,14 @@ kotlin {
     }
 }
 
-// 生成コードはコミット対象とし通常ビルドを再生成に依存させない（DB 無しでビルド・テスト可能）。
-// スキーマ変更時のみ flywayMigrate → jooqCodegen を実行して差分をコミットする（README 2.3）。
+// 生成コードはコミット対象とする。
 tasks.named("jooqCodegen") {
     dependsOn(tasks.named("flywayMigrate"))
+}
+
+// 生成 interface/DTO をコンパイル対象に含めるため、Kotlin コンパイル前に生成する。
+tasks.named("compileKotlin") {
+    dependsOn(tasks.named("openApiGenerate"))
 }
 
 tasks.withType<Test> {
@@ -118,8 +149,14 @@ tasks.withType<Test> {
 }
 
 ktlint {
-    // jOOQ 生成コードは整形対象外とする。
+    // jOOQ・OpenAPI の生成コードは整形対象外とする。
     filter {
         exclude { it.file.path.contains(jooqOutputDir) }
+        exclude { it.file.path.contains("generated/openapi") }
     }
+}
+
+// ktlint の入力ソースに生成ディレクトリが含まれるため、生成タスクへの依存を明示する。
+tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask>().configureEach {
+    dependsOn(tasks.named("openApiGenerate"))
 }
