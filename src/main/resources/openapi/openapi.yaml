@@ -1,0 +1,128 @@
+openapi: 3.1.1
+info:
+  title: 書籍管理システム API
+  description: 書籍・著者を管理するバックエンド API。
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: 'Local development'
+paths:
+  /api/books:
+    post:
+      operationId: registerBook
+      summary: 書籍の登録
+      tags:
+        - books
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: 入力値の形式・制約違反
+        "404":
+          description: 指定された著者が存在しない
+  /api/books/{bookId}:
+    put:
+      operationId: updateBook
+      summary: 書籍の更新（全体置換）
+      tags:
+        - books
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: 入力値の形式・制約違反
+        "404":
+          description: 書籍または指定された著者が存在しない
+        "422":
+          description: 出版状況の不正な遷移
+components:
+  schemas:
+    PublicationStatus:
+      type: string
+      description: 出版状況
+      enum:
+        - UNPUBLISHED
+        - PUBLISHED
+    BookRequest:
+      type: object
+      description: 書籍の登録・更新リクエスト。
+      required:
+        - title
+        - price
+        - publicationStatus
+        - authorIds
+      properties:
+        title:
+          type: string
+          description: 書籍タイトル。簡易チェックのため空文字チェックは省略。
+          minLength: 1
+          maxLength: 100
+        price:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 1000000
+        publicationStatus:
+          $ref: "#/components/schemas/PublicationStatus"
+        authorIds:
+          type: array
+          description: 著者ID。重複は排除されます。
+          uniqueItems: true
+          minItems: 1
+          maxItems: 100
+          items:
+            type: integer
+            format: int64
+    BookResponse:
+      type: object
+      description: 書籍の登録・更新レスポンス。値の制約は省略。
+      required:
+        - id
+        - title
+        - price
+        - publicationStatus
+        - authorIds
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        price:
+          type: integer
+          format: int32
+        publicationStatus:
+          $ref: "#/components/schemas/PublicationStatus"
+        authorIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: integer
+            format: int64
