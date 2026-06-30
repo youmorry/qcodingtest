@@ -146,6 +146,11 @@ tasks.named("compileKotlin") {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty("user.timezone", "Asia/Tokyo")
+}
+
+tasks.withType<org.springframework.boot.gradle.tasks.run.BootRun> {
+    systemProperty("user.timezone", "Asia/Tokyo")
 }
 
 ktlint {
