@@ -7,6 +7,7 @@ import com.example.qcodingtest.jooq.tables.references.AUTHORS
 import com.example.qcodingtest.jooq.tables.references.AUTHOR_BOOKS
 import com.example.qcodingtest.jooq.tables.references.BOOKS
 import org.jooq.DSLContext
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.jooq.test.autoconfigure.JooqTest
@@ -26,6 +27,7 @@ class JooqAuthorRepositoryTest
         private val create: DSLContext,
     ) : AbstractRepositoryTest() {
         @Test
+        @DisplayName("著者を永続化し、採番済みIDを付与して返す")
         fun `should persist the author and return it with a generated id`() {
             val birthDate = LocalDate.of(1990, 5, 20)
 
@@ -35,13 +37,13 @@ class JooqAuthorRepositoryTest
             assertEquals("テスト太郎", created.name)
             assertEquals(birthDate, created.birthDate)
 
-            val record = create.selectFrom(AUTHORS).where(AUTHORS.ID.eq(authorId)).fetchOne()
-            assertNotNull(record, "著者が永続化されること")
+            val record = assertNotNull(create.selectFrom(AUTHORS).where(AUTHORS.ID.eq(authorId)).fetchOne())
             assertEquals("テスト太郎", record.name)
             assertEquals(birthDate, record.birthDate)
         }
 
         @Test
+        @DisplayName("更新時に著者の全項目を置き換える")
         fun `should replace all author fields when updated`() {
             val created =
                 authorRepository.save(Author(id = null, name = "旧名前", birthDate = LocalDate.of(1980, 1, 1)))
@@ -56,6 +58,7 @@ class JooqAuthorRepositoryTest
         }
 
         @Test
+        @DisplayName("存在する著者を返す")
         fun `should return the author when it exists`() {
             val created =
                 authorRepository.save(Author(id = null, name = "検索対象", birthDate = LocalDate.of(1975, 3, 10)))
@@ -68,6 +71,7 @@ class JooqAuthorRepositoryTest
         }
 
         @Test
+        @DisplayName("存在しない著者IDの取得は空で返す")
         fun `should return empty when the author does not exist`() {
             val result = authorRepository.findById(-1L)
 
@@ -75,23 +79,26 @@ class JooqAuthorRepositoryTest
         }
 
         @Test
+        @DisplayName("指定した著者がすべて存在すれば true を返す")
         fun `should return true when all given authors exist`() {
-            val id1 = assertNotNull(saveAuthor("著者1"))
-            val id2 = assertNotNull(saveAuthor("著者2"))
+            val id1 = saveAuthor("著者1")
+            val id2 = saveAuthor("著者2")
 
             assertTrue(authorRepository.existsAllByIds(setOf(id1, id2)))
         }
 
         @Test
+        @DisplayName("指定した著者のいずれかが存在しなければ false を返す")
         fun `should return false when any given author is missing`() {
-            val id1 = assertNotNull(saveAuthor("著者1"))
+            val id1 = saveAuthor("著者1")
 
             assertFalse(authorRepository.existsAllByIds(setOf(id1, -1L)))
         }
 
         @Test
+        @DisplayName("著者に紐づく書籍を返す")
         fun `should return books linked to the author`() {
-            val authorId = assertNotNull(saveAuthor("著者A"))
+            val authorId = saveAuthor("著者A")
             val bookId = insertBook("テスト書籍")
             create
                 .insertInto(AUTHOR_BOOKS)
@@ -109,8 +116,9 @@ class JooqAuthorRepositoryTest
         }
 
         @Test
+        @DisplayName("著者に紐づく書籍がなければ空リストを返す")
         fun `should return empty list when the author has no books`() {
-            val authorId = assertNotNull(saveAuthor("著者B"))
+            val authorId = saveAuthor("著者B")
 
             val books = authorRepository.findBooksById(authorId)
 

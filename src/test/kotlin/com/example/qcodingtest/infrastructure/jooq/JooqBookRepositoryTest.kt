@@ -8,6 +8,7 @@ import com.example.qcodingtest.jooq.tables.references.AUTHORS
 import com.example.qcodingtest.jooq.tables.references.AUTHOR_BOOKS
 import com.example.qcodingtest.jooq.tables.references.BOOKS
 import org.jooq.DSLContext
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.jooq.test.autoconfigure.JooqTest
@@ -26,6 +27,7 @@ class JooqBookRepositoryTest
         private val create: DSLContext,
     ) : AbstractRepositoryTest() {
         @Test
+        @DisplayName("書籍を著者リンクごと永続化し、採番済みIDを付与して返す")
         fun `should persist the book with its author links and return it with a generated id`() {
             val authorId1 = insertAuthor("著者A")
             val authorId2 = insertAuthor("著者B")
@@ -44,8 +46,7 @@ class JooqBookRepositoryTest
             assertEquals(PublicationStatus.UNPUBLISHED, created.book.publicationStatus)
             assertEquals(setOf(authorId1, authorId2), created.authorIds)
 
-            val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
-            assertNotNull(bookRecord, "bookが永続化されること")
+            val bookRecord = assertNotNull(create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne())
             assertEquals("テスト駆動開発", bookRecord.title)
             assertEquals(2860, bookRecord.price)
             assertEquals(PublicationStatus.UNPUBLISHED.name, bookRecord.publicationStatus)
@@ -60,6 +61,7 @@ class JooqBookRepositoryTest
         }
 
         @Test
+        @DisplayName("更新時に書籍の全項目と著者リンクを置き換える")
         fun `should replace all book fields and author links when updated`() {
             val authorId1 = insertAuthor("著者A")
             val authorId2 = insertAuthor("著者B")
@@ -81,8 +83,7 @@ class JooqBookRepositoryTest
                 ),
             )
 
-            val bookRecord = create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne()
-            assertNotNull(bookRecord, "bookが残っていること")
+            val bookRecord = assertNotNull(create.selectFrom(BOOKS).where(BOOKS.ID.eq(bookId)).fetchOne())
             assertEquals("新タイトル", bookRecord.title)
             assertEquals(3000, bookRecord.price)
             assertEquals(PublicationStatus.PUBLISHED.name, bookRecord.publicationStatus)
@@ -97,6 +98,7 @@ class JooqBookRepositoryTest
         }
 
         @Test
+        @DisplayName("存在する書籍を返す")
         fun `should return the book without authors when it exists`() {
             val authorId = insertAuthor("著者A")
             val created =
@@ -114,6 +116,7 @@ class JooqBookRepositoryTest
         }
 
         @Test
+        @DisplayName("存在しない書籍IDの取得は空で返す")
         fun `should return empty when the book does not exist`() {
             val result = bookRepository.findById(-1L)
 
