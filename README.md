@@ -7,6 +7,62 @@
 
 ---
 
+## 0. クイックスタート
+
+### 前提
+
+- Docker / Docker Compose（PostgreSQL 用）
+- JDK 25（`./gradlew` 経由で toolchain が解決されるため、なくても可）
+
+### 起動手順
+
+```bash
+# 1. リポジトリを取得
+git clone <this-repo> && cd qcodingtest
+
+# 2. DB を起動（初回はイメージ取得。healthy になるまで待機）
+docker compose up -d
+
+# 3. アプリを起動（起動時に Flyway がスキーマを自動適用する）
+# Flyway の自動適用のみしたい場合は ./gradlew flywayMigrate
+./gradlew bootRun
+```
+
+起動後、API は `http://localhost:8080` で待ち受ける。
+
+```bash
+# 動作確認例
+curl -s http://localhost:8080/api/authors/1/books
+```
+
+> jOOQ / OpenAPI の生成コードはコミット済みのため、通常のビルド・起動に DB 起動時の再生成は不要。
+> スキーマ（`src/main/resources/db/migration/`）を変更したときのみ、DB を起動して `./gradlew jooqCodegen` で再生成し差分をコミットする（2.3 参照）。
+
+### テスト
+
+```bash
+# Testcontainers 利用のため DB 起動は不要
+./gradlew test
+```
+
+### サンプルデータ（seed）の投入
+
+動作確認用のサンプルデータを [`src/main/resources/db/seed.sql`](src/main/resources/db/seed.sql) に用意している（Flyway 管理外のため起動や codegen には影響しない）。DB 起動後に投入する。
+
+```bash
+docker compose exec -T db psql -U qcodingtest -d qcodingtest < src/main/resources/db/seed.sql
+```
+
+### DB のリセット
+
+```bash
+# データ・スキーマごと破棄して作り直す（ボリューム削除 → 再作成）。
+# 次回のアプリ起動時に Flyway がスキーマを再適用する。
+docker compose down -v && docker compose up -d
+```
+
+---
+
 ## 1. 必須要件（テスト要件）
 
 > これらはコーディングテストとして必ず満たすべき要件。
@@ -103,7 +159,6 @@
 
 - **サーバ側コード生成**: [OpenAPI Generator](https://openapi-generator.tech/) の `kotlin-spring` ジェネレータを採用。Gradle 連携は `org.openapi.generator` プラグインを使用する。
   - `interfaceOnly=true` とし、**API interface と DTO のみ生成**する（Controller 実装やSpringボイラープレートは生成しない）。実装側は生成 interface を実装する。
-- **API クライアント / ドキュメント表示**: [Scalar](https://github.com/scalar/scalar) を採用。OpenAPI スキーマの描画に加え、**手動疎通テスト用の API クライアントとしても利用**する（Postman 等の代替を兼ねるため別途クライアントは導入しない）。
 
 ### 2.3 jOOQ コード生成パイプライン
 
