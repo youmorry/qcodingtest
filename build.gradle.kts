@@ -6,6 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        // springboot の依存に合わせてバージョンを指定する。
         classpath("org.flywaydb:flyway-database-postgresql:12.4.0")
         classpath("org.postgresql:postgresql:42.7.11")
     }
@@ -116,7 +117,6 @@ openApiGenerate {
             // バージョン3以降という意味
             "useSpringBoot3" to "true",
             "useTags" to "true",
-            "useBeanValidation" to "true",
             "documentationProvider" to "none",
             "enumPropertyNaming" to "original",
             "serializationLibrary" to "jackson",
@@ -134,12 +134,12 @@ kotlin {
     }
 }
 
-// 生成コードはコミット対象とする。
+// DB接続依存なため、 jooq 生成コードはコミット対象とする。
 tasks.named("jooqCodegen") {
     dependsOn(tasks.named("flywayMigrate"))
 }
 
-// 生成 interface/DTO をコンパイル対象に含めるため、Kotlin コンパイル前に生成する。
+// openapi interface/DTO をコンパイル対象に含めるため、Kotlin コンパイル前に生成する。
 tasks.named("compileKotlin") {
     dependsOn(tasks.named("openApiGenerate"))
 }
@@ -161,7 +161,7 @@ ktlint {
     }
 }
 
-// ktlint の入力ソースに生成ディレクトリが含まれるため、生成タスクへの依存を明示する。
+// ktlint の lint 対象からは除外しているが、入力ソース（srcDir）には openapi gen の生成ディレクトリが含まれるため、生成タスクへの依存を明示する。
 tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask>().configureEach {
     dependsOn(tasks.named("openApiGenerate"))
 }
