@@ -12,18 +12,17 @@
 ### 前提
 
 - Docker / Docker Compose（PostgreSQL 用）
-- JDK 25（`./gradlew` 経由で toolchain が解決されるため、なくても可）
+- JDK 25
+
+または、 devcontainer を利用可能
 
 ### 起動手順
 
 ```bash
-# 1. リポジトリを取得
-git clone <this-repo> && cd qcodingtest
-
-# 2. DB を起動（初回はイメージ取得。healthy になるまで待機）
+# 1. DB を起動
 docker compose up -d
 
-# 3. アプリを起動（起動時に Flyway がスキーマを自動適用する）
+# 2. アプリを起動（起動時に Flyway がスキーマを自動適用する）
 # Flyway の自動適用のみしたい場合は ./gradlew flywayMigrate
 ./gradlew bootRun
 ```
@@ -57,7 +56,6 @@ docker compose exec -T db psql -U qcodingtest -d qcodingtest < src/main/resource
 
 ```bash
 # データ・スキーマごと破棄して作り直す（ボリューム削除 → 再作成）。
-# 次回のアプリ起動時に Flyway がスキーマを再適用する。
 docker compose down -v && docker compose up -d
 ```
 
