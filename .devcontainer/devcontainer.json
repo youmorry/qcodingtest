@@ -2,12 +2,6 @@
   "name": "qcodingtest",
   "build": { "dockerfile": "Dockerfile" },
   "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "none",
-      "installGradle": "true",
-      "gradleVersion": "9.6.1"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:4": {
       "moby": false
     }
@@ -28,8 +22,7 @@
         "vscjava.vscode-java-pack",
         "vscjava.vscode-gradle",
         "editorconfig.editorconfig",
-        "dbcode.dbcode",
-        "vmware.vscode-spring-boot"
+        "dbcode.dbcode"
       ]
     }
   }
