@@ -13,6 +13,7 @@ data class Author(
     val birthDate: LocalDate,
 ) {
     init {
+        require(name.isNotEmpty()) { "著者名は空にできません" }
         require(name.length <= MAX_NAME_LENGTH) { "著者名は${MAX_NAME_LENGTH}文字以内である必要があります: ${name.length}" }
         require(!birthDate.isAfter(LocalDate.now())) { "生年月日は現在日以前である必要があります: $birthDate" }
     }

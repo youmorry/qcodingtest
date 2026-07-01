@@ -14,6 +14,7 @@ data class Book(
     val publicationStatus: PublicationStatus,
 ) {
     init {
+        require(title.isNotEmpty()) { "タイトルは空にできません" }
         require(title.length <= MAX_TITLE_LENGTH) { "タイトルは${MAX_TITLE_LENGTH}文字以内である必要があります: ${title.length}" }
         require(price in 0..MAX_PRICE) { "価格は0以上${MAX_PRICE}以下である必要があります: $price" }
     }
