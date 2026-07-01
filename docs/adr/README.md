@@ -24,4 +24,5 @@
 | 18 | 2026-07-01 | ドメインの `require` による構造制約違反（title長・price範囲・著者数・生年月日）は安全網と位置づけ、`IllegalArgumentException` を 400 へマッピングするハンドラは設けない | すべての入力は先に Bean Validation（OpenAPI スキーマ由来）で 400 として弾かれる前提のため、API 経由で `require` 違反が 500 に至る経路はない。 |
 | 19 | 2026-07-01 | jOOQ リポジトリの `DSLContext` フィールド名は `dsl` とする | 生成コード慣習の `create` は upsert 分岐用の private メソッド `create()` と紛らわしいため、役割が明確な `dsl` を用いる |
 | 20 | 2026-07-01 | jOOQ 生成 Record をドメインモデルとして使わず、`data class` のドメインモデル（`Book`/`BookWithAuthors`/`Author`）を別途定義する | 出版状況の遷移ルールは `publicationStatus` を enum 化して初めて表現でき（Record は `String`）、多対多を束ねる `BookWithAuthors` 集約は単一テーブルの Record では表せない。リポジトリでのマッピング記述は増えるが、ビジネスルールのドメイン層集約・不変性を優先する |
-| 20 | 2026-07-01 | openapi gen で生成される EnumConverterConfiguration (Bean) は springboot 管理にしない。 | パスパラメータの変換に使われるが現時点で使わないため。 |
+| 21 | 2026-07-01 | openapi gen で生成される EnumConverterConfiguration (Bean) は springboot 管理にしない。 | パスパラメータの変換に使われるが現時点で使わないため。 |
+| 22 | 2026-07-01 | 入力制約は「OpenAPI スキーマ（Bean Validation）／ドメインの不変条件」で表現しているため、値を変更する際は整合を保つようにする。 | それぞれが別々の理由（400 検証・安全網）で値をしたいため。 |
