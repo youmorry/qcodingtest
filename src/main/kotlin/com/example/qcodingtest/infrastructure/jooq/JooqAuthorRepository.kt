@@ -42,13 +42,18 @@ class JooqAuthorRepository(
     }
 
     override fun findById(id: Long): Optional<Author> =
-        Optional.ofNullable(
-            dsl
-                .selectFrom(AUTHORS)
-                .where(AUTHORS.ID.eq(id))
-                .fetchOne()
-                ?.let { Author(id = it.id, name = it.name, birthDate = it.birthDate) },
-        )
+        dsl
+            .select(AUTHORS.ID, AUTHORS.NAME, AUTHORS.BIRTH_DATE)
+            .from(AUTHORS)
+            .where(AUTHORS.ID.eq(id))
+            .fetchOptional()
+            .map { record ->
+                Author(
+                    id = record[AUTHORS.ID],
+                    name = requireNotNull(record[AUTHORS.NAME]),
+                    birthDate = requireNotNull(record[AUTHORS.BIRTH_DATE]),
+                )
+            }
 
     override fun existsAllByIds(ids: Set<Long>): Boolean = dsl.fetchCount(AUTHORS, AUTHORS.ID.`in`(ids)) == ids.size
 
