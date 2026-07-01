@@ -11,3 +11,7 @@ spring:
     locations: classpath:db/migration
   jooq:
     sql-dialect: POSTGRES
+  mvc:
+    # 400 系（入力形式違反）のボディを標準の ProblemDetail(RFC7807) で返し、エラー内容を可視化する。
+    problemdetails:
+      enabled: true

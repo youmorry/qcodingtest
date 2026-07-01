@@ -14,13 +14,13 @@ import java.util.Optional
 
 @Repository
 class JooqAuthorRepository(
-    private val create: DSLContext,
+    private val dsl: DSLContext,
 ) : AuthorRepository {
     override fun save(author: Author): Author = if (author.id == null) create(author) else update(author)
 
     private fun create(author: Author): Author {
         val authorId =
-            create
+            dsl
                 .insertInto(AUTHORS)
                 .set(AUTHORS.NAME, author.name)
                 .set(AUTHORS.BIRTH_DATE, author.birthDate)
@@ -31,7 +31,7 @@ class JooqAuthorRepository(
     }
 
     private fun update(author: Author): Author {
-        create
+        dsl
             .update(AUTHORS)
             .set(AUTHORS.NAME, author.name)
             .set(AUTHORS.BIRTH_DATE, author.birthDate)
@@ -43,17 +43,17 @@ class JooqAuthorRepository(
 
     override fun findById(id: Long): Optional<Author> =
         Optional.ofNullable(
-            create
+            dsl
                 .selectFrom(AUTHORS)
                 .where(AUTHORS.ID.eq(id))
                 .fetchOne()
                 ?.let { Author(id = it.id, name = it.name, birthDate = it.birthDate) },
         )
 
-    override fun existsAllByIds(ids: Set<Long>): Boolean = create.fetchCount(AUTHORS, AUTHORS.ID.`in`(ids)) == ids.size
+    override fun existsAllByIds(ids: Set<Long>): Boolean = dsl.fetchCount(AUTHORS, AUTHORS.ID.`in`(ids)) == ids.size
 
     override fun findBooksById(id: Long): List<BookView> =
-        create
+        dsl
             .select(BOOKS.ID, BOOKS.TITLE, BOOKS.PRICE, BOOKS.PUBLICATION_STATUS)
             .from(BOOKS)
             .join(AUTHOR_BOOKS)

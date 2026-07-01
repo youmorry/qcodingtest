@@ -13,13 +13,13 @@ import java.util.Optional
 
 @Repository
 class JooqBookRepository(
-    private val create: DSLContext,
+    private val dsl: DSLContext,
 ) : BookRepository {
     override fun save(bookWithAuthors: BookWithAuthors): BookWithAuthors =
         if (bookWithAuthors.book.id == null) create(bookWithAuthors) else update(bookWithAuthors)
 
     override fun findById(id: Long): Optional<Book> =
-        create
+        dsl
             .select(BOOKS.ID, BOOKS.TITLE, BOOKS.PRICE, BOOKS.PUBLICATION_STATUS)
             .from(BOOKS)
             .where(BOOKS.ID.eq(id))
@@ -36,7 +36,7 @@ class JooqBookRepository(
     private fun create(bookWithAuthors: BookWithAuthors): BookWithAuthors {
         val book = bookWithAuthors.book
         val bookId =
-            create
+            dsl
                 .insertInto(BOOKS)
                 .set(BOOKS.TITLE, book.title)
                 .set(BOOKS.PRICE, book.price)
@@ -53,7 +53,7 @@ class JooqBookRepository(
     private fun update(bookWithAuthors: BookWithAuthors): BookWithAuthors {
         val bookId = requireNotNull(bookWithAuthors.book.id) { "更新には永続化済みの書籍ID が必要です" }
 
-        create
+        dsl
             .update(BOOKS)
             .set(BOOKS.TITLE, bookWithAuthors.book.title)
             .set(BOOKS.PRICE, bookWithAuthors.book.price)
@@ -63,7 +63,7 @@ class JooqBookRepository(
             .execute()
 
         // PUT は全置換のため、著者リンクは差分更新せず一旦すべて削除してから貼り直す。
-        create
+        dsl
             .deleteFrom(AUTHOR_BOOKS)
             .where(AUTHOR_BOOKS.BOOK_ID.eq(bookId))
             .execute()
@@ -77,7 +77,7 @@ class JooqBookRepository(
         authorIds: Set<Long>,
     ) {
         val linkRows = authorIds.map { authorId -> DSL.row(authorId, bookId) }
-        create
+        dsl
             .insertInto(AUTHOR_BOOKS, AUTHOR_BOOKS.AUTHOR_ID, AUTHOR_BOOKS.BOOK_ID)
             .valuesOfRows(linkRows)
             .execute()

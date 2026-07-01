@@ -20,3 +20,6 @@
 | 14 | 2026-06-28 | エラーハンドリングは簡易にとどめ、`@RestControllerAdvice` で例外をステータス（404/422）へ対応付けるのみとする。レスポンスボディの形式やメッセージの統一（`ProblemDetail` への統一・多言語化・エラーコード体系など）は行わない | 入力形式違反（400）は Bean Validation により Spring 標準で処理され、ボディは Spring 標準のエラー表現に委ねる方針。 |
 | 15 | 2026-06-30 | タイムゾーンは JVM のみ指定する | 現時点でJVMの指定のみで問題ないため |
 | 16 | 2026-07-01 | リポジトリの単一存在確認で複数存在確認のメソッドを流用する | 呼び出し側での読みにくさはあるが、シンプルな処理のうちは許容する |
+| 17 | 2026-07-01 | `@RestControllerAdvice` は独自例外（404/422）のみを対応付け、400 系（`MethodArgumentNotValid` 等）の自前ハンドラは持たない。代わりに `spring.mvc.problemdetails.enabled=true` で標準の ProblemDetail(RFC7807) ボディを返す | 作り込まずシンプルにするため |
+| 18 | 2026-07-01 | ドメインの `require` による構造制約違反（title長・price範囲・著者数・生年月日）は安全網と位置づけ、`IllegalArgumentException` を 400 へマッピングするハンドラは設けない | すべての入力は先に Bean Validation（OpenAPI スキーマ由来）で 400 として弾かれる前提のため、API 経由で `require` 違反が 500 に至る経路はない。 |
+| 19 | 2026-07-01 | jOOQ リポジトリの `DSLContext` フィールド名は `dsl` とする | 生成コード慣習の `create` は upsert 分岐用の private メソッド `create()` と紛らわしいため、役割が明確な `dsl` を用いる |
