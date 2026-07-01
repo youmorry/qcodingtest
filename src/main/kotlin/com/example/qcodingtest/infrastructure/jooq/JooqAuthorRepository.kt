@@ -59,6 +59,7 @@ class JooqAuthorRepository(
             .join(AUTHOR_BOOKS)
             .on(AUTHOR_BOOKS.BOOK_ID.eq(BOOKS.ID))
             .where(AUTHOR_BOOKS.AUTHOR_ID.eq(id))
+            .orderBy(BOOKS.ID.asc())
             .fetch()
             .map { row ->
                 BookView(
